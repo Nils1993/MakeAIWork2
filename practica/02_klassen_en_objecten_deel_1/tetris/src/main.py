@@ -28,7 +28,6 @@ figures_pos = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],
                [(0, 0), (0, -1), (0, 1), (-1, 0)]]
                
 
-figures = [[pygame.Rect(x + W // 2, y + 1, 1, 1) for x, y in fig_pos] for fig_pos in figures_pos]
 figure_rect = pygame.Rect(0, 0, TILE - 2, TILE - 2)
 field = [[0 for i in range(W)] for j in range(H)]
 
@@ -46,17 +45,17 @@ title_record = font.render('record:', True, pygame.Color('purple'))
 
 get_color = lambda : (randrange(30, 256), randrange(30, 256), randrange(30, 256))
 
-figure, next_figure = deepcopy(choice(figures)), deepcopy(choice(figures))
-color, next_color = get_color(), get_color()
+figure, next_figure = Figure(choice(figures_pos)), Figure(choice(figures_pos))
+color, next_color = figure.getColor(), next_figure.getColor()
 
 score, lines = 0, 0
 scores = {0: 0, 1: 100, 2: 300, 3: 700, 4: 1500}
 
 
 def check_borders():
-    if figure[i].x < 0 or figure[i].x > W - 1:
+    if figure.shape[i].x < 0 or figure.shape[i].x > W - 1:
         return False
-    elif figure[i].y > H - 1 or field[figure[i].y][figure[i].x]:
+    elif figure.shape[i].y > H - 1 or field[figure.shape[i].y][figure.shape[i].x]:
         return False
     return True
 
@@ -101,7 +100,7 @@ while True:
     # move x
     figure_old = deepcopy(figure)
     for i in range(4):
-        figure[i].x += dx
+        figure.shape[i].x += dx
         if not check_borders():
             figure = deepcopy(figure_old)
             break
@@ -111,26 +110,21 @@ while True:
         anim_count = 0
         figure_old = deepcopy(figure)
         for i in range(4):
-            figure[i].y += 1
+            figure.shape[i].y += 1
             if not check_borders():
                 for i in range(4):
-                    field[figure_old[i].y][figure_old[i].x] = color
+                    field[figure_old.shape[i].y][figure_old.shape[i].x] = color
                 figure, color = next_figure, next_color
-                next_figure, next_color = deepcopy(choice(figures)), get_color()
+                next_figure = Figure(choice(figures_pos))
+                next_color = next_figure.getColor()
                 anim_limit = 2000
                 break
     # rotate
-    center = figure[0]
+    center = figure.shape[0]
     figure_old = deepcopy(figure)
     if rotate:
-        for i in range(4):
-            x = figure[i].y - center.y
-            y = figure[i].x - center.x
-            figure[i].x = center.x - x
-            figure[i].y = center.y + y
-            if not check_borders():
-                figure = deepcopy(figure_old)
-                break
+        figure.rotate(figure_old)
+
     # check lines
     line, lines = H - 1, 0
     for row in range(H - 1, -1, -1):
@@ -150,8 +144,8 @@ while True:
     [pygame.draw.rect(game_sc, (40, 40, 40), i_rect, 1) for i_rect in grid]
     # draw figure
     for i in range(4):
-        figure_rect.x = figure[i].x * TILE
-        figure_rect.y = figure[i].y * TILE
+        figure_rect.x = figure.shape[i].x * TILE
+        figure_rect.y = figure.shape[i].y * TILE
         pygame.draw.rect(game_sc, color, figure_rect)
     # draw field
     for y, raw in enumerate(field):
@@ -161,8 +155,8 @@ while True:
                 pygame.draw.rect(game_sc, col, figure_rect)
     # draw next figure
     for i in range(4):
-        figure_rect.x = next_figure[i].x * TILE + 380
-        figure_rect.y = next_figure[i].y * TILE + 185
+        figure_rect.x = next_figure.shape[i].x * TILE + 380
+        figure_rect.y = next_figure.shape[i].y * TILE + 185
         pygame.draw.rect(sc, next_color, figure_rect)
     # draw titles
     sc.blit(title_tetris, (485, -10))
