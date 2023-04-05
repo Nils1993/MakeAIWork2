@@ -5,7 +5,14 @@ import itertools
 import logging
 import numpy as np
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s %(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+    filename="logs.log",
+    filemode="w",
+    level=logging.INFO,
+    force=True,
+)
 
 # Waarheidstabel invoerwaarden
 possibleOutcomes = [0, 1]
@@ -18,9 +25,21 @@ logging.debug(f"xTrain : {xTrain}")
 # Waarheidstabel output
 yTrain = np.array([0, 0, 0, 1])
 
+# Xtrain -> Ytrain
+# 0 0 -> 0
+# 0 1 -> 0
+# 1 0 -> 0
+# 1 1 -> 1
+
+# Xtrain -> Ytrain
+# circle -> [1, 0]
+# cross -> [0, 1]
+
 # Maak een object perceptron aan
 andPerceptron = Perceptron()
 # Train de perceptron met een AND functie
+# Default value for epochs -> nr of train cycles
+# Default value for learningRate
 andPerceptron.train(xTrain, yTrain, epochs=100, learningRate=0.1)
 
 # Test de perceptron
@@ -30,33 +49,23 @@ logging.info(f"Predicted y value : {prediction}")
 
 # Test de perceptrong
 # testInput = np.array([1, 1])
-logging.debug(f"testInput : {testInput}")
+logging.info(f"testInput : {testInput}")
 logging.info(f"Predicted y value : {prediction}")
 
-# OPDDRACHT
+prediction = andPerceptron.predict(testInput)
+logging.info(f"testInput : {testInput}")
+logging.info(f"Predicted y value : {prediction}")
+
+# OPDRACHT
 # Maak nu zelf het object orPerceptron
 orPerceptron = Perceptron()
 
 yTrain = np.array([0, 1, 1, 1])
 orPerceptron.train(xTrain, yTrain, epochs=100, learningRate=0.1)
-
-# test de perceptron
 testInput = np.array([0, 0])
-prediction = orPerceptron.predict(testInput)
-logging.debug(f"testInput : {testInput}")
-logging.info(f"Predicted y value : {prediction}")
-
 testInput = np.array([0, 1])
-prediction = orPerceptron.predict(testInput)
-logging.debug(f"testInput : {testInput}")
-logging.info(f"Predicted y value : {prediction}")
-
 testInput = np.array([1, 0])
-prediction = orPerceptron.predict(testInput)
-logging.debug(f"testInput : {testInput}")
-logging.info(f"Predicted y value : {prediction}")
-
 testInput = np.array([1, 1])
-prediction = orPerceptron.predict(testInput)
-logging.debug(f"testInput : {testInput}")
-logging.info(f"Predicted y value : {prediction}")
+
+
+[[], []]
