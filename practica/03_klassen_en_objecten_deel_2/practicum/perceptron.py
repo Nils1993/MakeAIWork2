@@ -34,7 +34,7 @@ class Perceptron:
 
         # Initialize bias
         self.bias = 0
-
+        
     def train(self, X, y, epochs=100, learningRate=0.1):
         """
         Train the perceptron using the inputVector

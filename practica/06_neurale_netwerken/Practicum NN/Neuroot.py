@@ -2,8 +2,9 @@ import numpy as np
 import math
 import random
 import logging
+from icecream import ic
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.INFO)
 
 # Create a neural network that can see the difference between a + or a 0
 
@@ -16,14 +17,17 @@ class Neuroot:
         pass
 
     # Initialize bias between 0 and 1
-    def initialize_bias(self):      
-        return random.uniform(0, 1)
+    def initialize_bias(self):
+        self.bias = random.uniform(0, 1)
+        
+        return self.bias
 
     # Initialize weight between 0 and 1
     def initialize_weightMatrix(self, size):
+        self.weights = [round(random.uniform(0, 1),2) for i in range(size)]
         
         # As 1*9
-        return [round(random.uniform(0, 1),2) for i in range(size)]
+        return self.weights
 
     # transform
     def flatten(self, matrix):    
@@ -60,15 +64,16 @@ class Neuroot:
         for j in range(len(input_matrix)):
 
             # (x1*w1 + x2*w2....) + bias 
-            weighted_sum = weighted_sum + (input_matrix[j][0] * weight_matrix[j])
-            weighted_sum02 = weighted_sum02 + (input_matrix[j][0] * weight_matrix02[j])
+            weighted_sum += (input_matrix[j][0] * weight_matrix[j])
+            weighted_sum02 += (input_matrix[j][0] * weight_matrix02[j])
             
             # The + bias part
-            weighted_sum = weighted_sum + self.bias
-            weighted_sum02 = weighted_sum02 + self.bias
+            weighted_sum += self.bias
+            weighted_sum02 += self.bias02
 
         # Apply softmax function and put in a list
         output_list = self.softmax([weighted_sum, weighted_sum02])
+        # self.softmax()
         return output_list
     
     # Train function
@@ -80,12 +85,15 @@ class Neuroot:
 
         # Flatten matrix + append into x_train
         for i in range(len(x)):
+            logging.info(len(x))
             self.x_train.append(self.flatten(x[i]))
         logging.debug(f'Flattened: {self.x_train}')
         
         # Initialize Bias
         self.bias = self.initialize_bias()
+        self.bias02 = self.initialize_bias()
         logging.debug(f'Bias: {self.bias}')
+        logging.debug(f'Bias 2: {self.bias02}')
 
         # Initialize Weight matrix
         self.weight_matrix = self.initialize_weightMatrix(len(self.x_train[0]))
@@ -93,11 +101,63 @@ class Neuroot:
         logging.debug(f'Weight: {self.weight_matrix}')
         logging.debug(f'Weight 2: {self.weight_matrix02}')
 
-        
+        # Epochs
         epochs = range(0, epochs)
+        # Starting point error
+        lowest_error = 9e9
 
+        # Create error starting point
+        error = 0
+        counter = 0
+        # Start training
         for epoch in epochs:
+            counter += 1
             logging.info(f"epoch : {epoch}")
+
+            if error < lowest_error:
+                
+                print(f"runs at try {counter} -> {error} < {lowest_error}")
+                if error != 0:
+                    lowest_error = error
+                random_index = random.randrange(0,9)
+                
+                self.weight_matrix[random_index] = round(random.uniform(0, 1),2)
+                self.previous_weight =  self.weight_matrix
+
+                
+         
+
+                self.weight_matrix02[random_index] = round(random.uniform(0, 1),2)
+                self.previous_weight02 =  self.weight_matrix02
+
+                # self.bias = self.initialize_bias()
+                # self.previous_bias = self.bias
+                # self.bias02 = self.initialize_bias()
+                # self.previous_bias02 = self.bias02
+
+
+            else:
+
+                self.weight_matrix = self.previous_weight
+                self.weight_matrix02 = self.previous_weight02
+
+                # self.bias = self.previous_bias
+                # self.bias02 = self.previous_bias02
+
+                random_index = random.randrange(0,9)
+                
+                self.weight_matrix[random_index] = round(random.uniform(0, 1),2)
+                self.previous_weight =  self.weight_matrix
+
+                self.weight_matrix02[random_index] = round(random.uniform(0, 1),2)
+                self.previous_weight02 =  self.weight_matrix02
+
+                # self.bias = self.initialize_bias()
+                # self.previous_bias = self.bias
+                # self.bias02 = self.initialize_bias()
+                # self.previous_bias02 = self.bias02
+
+    
 
             # For each inputVector
             for inputVector, label in zip(self.x_train, y_train):
@@ -107,24 +167,24 @@ class Neuroot:
                 logging.debug(f"label : {label}")
 
                 # Predict output
-                prediction = self.classify(inputVector)
-                logging.debug(f"prediction : {prediction}")
+                classification = self.classify(inputVector)
+                logging.debug(f"Classify : {classification}")
+
+                # Reset error
+                error = 0
 
                 # Determine error
-                error = label - prediction
-                logging.debug(f"error : {error}")
+                for i in range(len(label)):
+                    error += (-math.log2(classification[i]) * label[i])
+
+            logging.debug(f"Weight 1 : {self.weight_matrix}")
+            logging.debug(f"Weight 2 : {self.weight_matrix02}")
+            logging.debug(f"Error : {error}")
+            logging.debug(f'Lowest error : {lowest_error}')
+    
                 # update weight and b
-                if error != 0:
-                    for j in inputVector:
-
-                        deltaWeight = learning_rate * (self.weightVector + (error * j))
-                        self.weightVector = self.weightVector + deltaWeight
-                        logging.debug(f"deltaWeight : {deltaWeight}")
-                        logging.debug(f"learning_rate : {learning_rate}")
-
-                        deltaBias = learning_rate * (self.bias + error)
-                        self.bias = self.bias + deltaBias
-                        logging.debug(f"deltaBias : {deltaBias}")
+        logging.info(f'Lowest error : {lowest_error}')        
+        return self.previous_weight, self.previous_weight02
 
     # Input: 3x3 matrix
     # Output: 2x1 matrix
@@ -134,3 +194,21 @@ class Neuroot:
         # Multiply and show outcome
         self.prediction_matrix = self.multiply(self.input_matrix, self.weight_matrix, self.weight_matrix02)
         return self.prediction_matrix
+    
+    # Prediction function
+    def predict(self, input):
+        self.weight_matrix = self.previous_weight
+        self.weight_matrix02 = self.previous_weight02
+
+        # self.bias = self.previous_bias
+        # self.bias02 = self.previous_bias02
+
+        prediction = self.classify(input)
+
+        if prediction[0] >= 0.5:
+
+            print(f"This is a circle! Prediction outcome: {prediction}")
+        
+        else:
+            print(f"This is a cross! Prediction outcome: {prediction}")
+        
