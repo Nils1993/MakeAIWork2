@@ -1,29 +1,4 @@
-'''
-====== Legal notices
 
-Copyright (C) 2013 - 2021 GEATEC engineering
-
-This program is free software.
-You can use, redistribute and/or modify it, but only under the terms stated in the QQuickLicense.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY, without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the QQuickLicense for details.
-
-The QQuickLicense can be accessed at: http://www.qquick.org/license.html
-
-__________________________________________________________________________
-
-
- THIS PROGRAM IS FUNDAMENTALLY UNSUITABLE FOR CONTROLLING REAL SYSTEMS !!
-
-__________________________________________________________________________
-
-It is meant for training purposes only.
-
-Removing this header ends your license.
-'''
 import pickle
 import time as tm
 import traceback as tb
@@ -40,16 +15,16 @@ ss.path +=  [os.path.abspath (relPath) for relPath in  ('..',)]
 import socket_wrapper as sw
 import parameters as pm
 
-class HardcodedClient:
+class Agent:
     def __init__ (self):
         self.steeringAngle = 0
 
         # Load lidar model
-        pkl_load_path = "C:/Users/nilsm/workspace/MakeAIWork2/project/simpylc/pickle/LidarBrain.pkl"
+        pkl_load_path = "../pickle/LidarBrain.pkl"
         self.lb_model = pickle.load(open(pkl_load_path, "rb"))
 
         # Load sonar model
-        pkl_load_path_2 = "C:/Users/nilsm/workspace/MakeAIWork2/project/simpylc/pickle/SonarBrain.pkl"
+        pkl_load_path_2 = "../pickle/SonarBrain.pkl"
         self.sb_model = pickle.load(open(pkl_load_path_2, "rb"))
 
         with open (pm.sampleFileName, 'w') as self.sampleFile:
@@ -203,4 +178,4 @@ class HardcodedClient:
         else:
             self.logSonarTraining ()
 
-HardcodedClient ()
+Agent()
